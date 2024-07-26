@@ -1,0 +1,28 @@
+{
+  "package": "com.lst.b2048",
+  "name": "2048",
+  "versionName": "1.2",
+  "versionCode": 5,
+  "minPlatformVersion": 1000,
+  "icon": "/common/logo.png",
+  "deviceTypeList": [
+    "watch"
+  ],
+  "features": [
+    { "name": "system.storage" },
+    { "name": "system.prompt" },
+    {"name": "system.folme"}
+  ],
+  "config": {
+    "logLevel": "log",
+    "designWidth": 192
+  },
+  "router": {
+    "entry": "pages/index",
+    "pages": {
+      "pages/index": {
+        "component": "index"
+      }
+    }
+  }
+}

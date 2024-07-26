@@ -1,0 +1,432 @@
+<template>
+	<div onswipe="move" class="bg">
+		<!--背景+按钮-->
+		<div class="bg" if="{{dark}}">
+			<img src="/common/bg2.png" class="bg"/>
+			<img style="position: absolute;left: 8px;top: 363px;" src="/common/reset_b.png" @click="new_game" />
+			<img style="position: absolute;left: 100px;top: 363px;" src="/common/undo_b.png" @click="chcb" />
+			<img style="position: absolute;left: 56px;top: 424px;" src="/common/info_b.png" @click="openMenu()"/>
+		</div>
+		<div class="bg" else>
+			<img src="/common/bg1.png" class="bg"/>
+			<img style="position: absolute;left: 8px;top: 363px;" src="/common/reset.png" @click="new_game" />
+			<img style="position: absolute;left: 100px;top: 363px;" src="/common/undo.png" @click="chcb" />
+			<img style="position: absolute;left: 56px;top: 424px;" src="/common/info.png" @click="openMenu()"/>
+		</div>
+		<!--中间-->
+		<div style="position: absolute;left: 3px;top: 165px;width: 186px;height: 186px;padding-top: 3px;padding-left:3px;display: flex;flex-wrap: wrap;" >
+			<text class="square" for="{{blocks}}" style="background-color: {{bgc[md[$item]]}};"tid={{$item}} id={{$item}}  if="{{!dark}}">
+				{{ md[$item] }}
+			</text>
+			<text class="square" for="{{blocks}}" style="color: {{bgc[md[$item]]}};background-color: {{ise[$item]}}"tid={{$item}} id={{$item}} else >
+				{{ md[$item] }} 
+			</text>
+		</div>
+		<!--积分版-->
+		<text class="score">最高 {{ hsc }}</text>
+		<text class="score"style="top: 122px;">当前 {{ sco }}</text>
+		<!--about-->
+		<div class="bg" if="{{menuFlag}}" style="background-color:rgba(0,0,0,0)">
+		<scroll class="bg" scroll-y="true" bounces="true" id="about" style="transform:translateX(192px)">
+			<img src="/common/about.png"/>
+			<img src="/common/true.png" if="{{dark}}" class="btn"onclick="changeMode"/>
+			<img src="/common/false.png" else class="btn"onclick="changeMode"/>
+			<img src="/common/true.png" if="{{ani}}" class="btn" style="top: 674px;" onclick="changeani"/>
+			<img src="/common/false.png" else class="btn"onclick="changeani"style="top: 674px;"/>
+		</scroll></div>
+		<!--back-->
+		<img style="position: absolute;left: 45px;top: 6px;" src="/common/back_b.png" @click="exit('e')" if="{{dark||menuFlag}}"/>
+		<img style="position: absolute;left: 45px;top: 6px;" src="/common/back.png" @click="exit('e')" else/>
+	</div>
+</template>
+
+<style>
+text{
+	font-weight: bold;
+	text-align: center;
+}
+.score {
+	position: absolute;
+	left: 0px;
+	top: 84px;
+	width: 192px;
+	font-size: 28px;
+	color: rgba(255, 255, 255, 0.6);
+}
+.square {
+	width: 40px;
+	height: 40px;
+	margin-top: 4px;
+	margin-left: 4px;
+	border-radius: 13px;
+	font-size: 15px;
+	color: #59503f;
+}
+.bg{
+  position: absolute;
+  width: 192px;
+  height: 490px;
+  background-color: black;
+}
+.btn{
+	position: absolute;
+	left: 45px;
+	top: 504px;
+}
+</style>
+
+<script>
+import prompt from "@system.prompt";
+import storage from "@system.storage";
+import folme from '@system.folme'
+
+var sc = 0,
+	ls,
+	lhs,
+	board = Array(4),
+	added = Array(4),
+	over = 0,
+	lm =Array(4),
+	that;
+for (let i = 0; i < 4; i++) {lm[i]=new Array(4);board[i]=new Array(4);added[i]=new Array(4)}
+export default {
+	public: {
+		blocks: [
+			"0",
+			"1",
+			"2",
+			"3",
+			"4",
+			"5",
+			"6",
+			"7",
+			"8",
+			"9",
+			"10",
+			"11",
+			"12",
+			"13",
+			"14",
+			"15",
+		],
+		md: [],
+		hsc: 0,
+		sco: sc,
+		bgc: [],
+		ise: [],
+		ch:0,
+		update:0,
+		dark:false,
+		swSrc:"/common/false.png",
+		menuFlag:false,
+		ani:true
+	},
+	onInit() {
+		that = this;
+		this.update=0
+		let tempc =
+			"rgba(0,0,0,0) #EFE5DA #F0E0C9 #fcb477 #ff9c61 #ff865d #ff6a38 #ebcf71 #ebcc5f #ebc94f #ebc53f #ebc22c #F2B6B6 #E8ED51 #FFE3FB #E8FF8C #FFDEC9 #F5A433 #E6109B #96C4E6 #E560CD".split(
+				" "
+			);
+		tempc.forEach((a, index) => {
+			this.bgc[2 ** index] = a;
+		});
+		this.bgc[""] = "rgba(0, 0, 0, 0)";
+		storage.get({
+			key: "score",
+			success: (data) => {
+				if (data) {
+					let o = JSON.parse(data);
+					board=o.map
+					rm0(o.map);
+					this.hsc = o.hs;
+					this.sco=o.sc
+					this.ch = 0;
+					this.dark=o.dark
+					this.ani=o.ani
+				//console.log(data)
+				} else this.new_game();
+				
+			},
+			fail: function (data, code) {
+			},complete:()=>{
+				this.update=1;
+			}
+		});
+		clear(added)
+	},
+	chcb() {
+		if (this.ch ==1) {
+			this.hsc = lhs;
+			this.sco = ls;
+			for (let i = 0; i <4; i++) {
+				for (let j = 0; j < 4; j++) {
+					board[i][j]=lm[i][j]
+				}
+			}
+			rm0(board);
+			over=0;
+			this.save();
+			this.ch = 0;
+		}else{
+			prompt.showToast({
+        		message: "不能再撤啦",
+        		duration: 1000
+      		});
+		}
+	},
+	new_game() {
+		backup()
+		newgame();
+		this.sco = 0;
+		this.save();
+		clearani()
+	},
+	move(eve) {
+		if(this.menuFlag){
+			if(eve.direction=="right")this.exit('e')
+			return
+		}
+		//if(eve=="down")mo(eve);else
+		mo(eve.direction);
+		if (over) {
+			prompt.showToast({
+				message: "Gameover!",
+				duration: 2000,
+			});
+		}
+		if (this.sco > this.hsc) {
+			this.hsc = this.sco;
+		}
+		this.save();
+	},
+	save() {
+		let o = {
+			map: board,
+			hs: this.hsc,
+			sc: this.sco,
+			dark:this.dark,
+			ani:this.ani
+		};
+		//o=""
+		storage.set({
+			key: "score",
+			value: JSON.stringify(o),
+			success:()=>{//console.log(JSON.stringify(o))
+			},
+			fail:()=>{},
+		});
+	},
+
+	exit(a) {
+  		if(a.direction=='right'||a=="e"){
+			if(this.menuFlag){
+				folme.to({id:"about",toState:{translateX:"192px"},config:{duration:0.1,ease:"out"}});
+				setTimeout(() => {this.menuFlag =false;}, 100);
+			}
+			else this.$app.exit();
+		}
+	},
+
+	openMenu() {//打开about
+  		this.menuFlag =true;
+		setTimeout(() => {
+			folme.to({id:"about",toState:{translateX:"0px"},config:{duration:0.1,ease:"out"}});
+		}, 50);
+	},
+
+	changeMode(){
+		this.dark=!this.dark;
+		this.save()
+	},
+	changeani(){
+		this.ani=!this.ani;
+		this.save()
+	},onBackPress(){
+		this.exit('e')
+		return true;
+	}
+};
+function rm0(sm) {
+	let a=0;
+	for (let i = 0; i < 4; i++) {
+		for (var b = 0; 4 > b; b++) 
+		{
+			if (sm[i][b] == 0) {
+				that.md[a]=""
+				that.ise[a]="#00000000";
+			} else {that.ise[a]="#ffffff20";that.md[a]=sm[i][b]}
+			a++
+		}}
+	return
+}
+function clear(m){//清空数组
+	for (let i = 0; i < 4; i++) {m[i].fill(0)}
+}
+function newgame() {
+	 (over = 0);
+	clear(board)
+	newblock();
+	newblock();
+	rm0(board);
+}
+function rand_num(){//生成随机数，为了适配8的代码
+	return Math.floor(Math.random()*1000)
+}
+function newblock() {//生成新方块
+	for (var a = 3, b = rand_num() % 4, c = rand_num() % 4, d = 50 < rand_num() % 100 ? 4 : 2; 0 < a;) {
+		if (0 == board[b][c]) return board[b][c] = d
+		b = rand_num() % 4;
+		c = rand_num() % 4;
+		a--
+	}
+	for (a = 0; 4 > a; a++)
+		for (b = 0; 4 > b; b++)
+			if (0 == board[a][b]) return board[a][b] = 2
+}
+function mo(dir) {//移动函数2
+	let up = canMoveUp(board),
+		down = canMoveDown(board),
+		right = canMoveRight(board),
+		left = canMoveLeft(board);
+	if (up || left || down || right) {
+		if(eval(dir)){
+			backup()
+			eval("move"+dir+"()");
+			clear(added)
+			if(that.ani){
+				setTimeout(() => {clearani()}, 120);
+				setTimeout(() => {newblock();
+				rm0(board);
+				}, 110);
+			}else{
+				newblock();
+				rm0(board);
+			}
+		}
+		return
+	} 
+	over = 1;
+	rm0(board);return
+}
+function backup(){//使能够撤回
+	for (let i = 0; i <4; i++) {
+		for (let j = 0; j < 4; j++) {
+			lm[i][j]=board[i][j]
+		}
+	}
+	ls = that.sco
+	lhs = that.hsc
+	that.ch=1
+	return
+}
+function fromTo(id1,id2){//动画函数，让id1的物品移动到id2
+	if(that.ani){
+		id1=id1.toString()
+		id2=id2.toString()
+		let x1,y1,x2,y2;
+		that.$element(id1).getBoundingClientRect({
+			success: (data)=>{
+				let { top, bottom, left, right, width, height } = data;
+				x1=left;y1=top
+		}})
+		that.$element(id2).getBoundingClientRect({
+			success: (data)=>{
+				let { top, bottom, left, right, width, height } = data;
+				x2=left;y2=top
+		}})
+		x2-=x1;y2-=y1
+		folme.fromTo({id:id1,fromState:{translateY:"0px",translateX:"0px"},toState:{translateY:y2+"px",translateX:x2+"px"},config:{duration:0.1}});
+	}
+	return
+}
+function clearani(){//清除动画
+	for (let i = 0; i < 16; i++) {
+		let id=i.toString()
+		folme.cancel({id:id})
+		folme.setTo({id:id,toState:{translateY:"0px",translateX:"0px"}})
+	}
+}
+function moveleft() {
+	for (var a = 0; 4 > a; a++)
+		for (var b = 1; 4 > b; b++)
+			if (0 != board[a][b])
+				for (var c = 0; c < b; c++) {
+					if(0 == board[a][c] && noBlockHorizontal(a, c, b, board) ){
+						board[a][c] = board[a][b], board[a][b] = 0;
+						fromTo(a*4+b,a*4+c)
+						break
+					}
+					else board[a][c] == board[a][b] && noBlockHorizontal(a, c, b, board) && (0 != added[a][c] ? (board[a][c + 1] = board[a][b], board[a][b] = 0,fromTo(a*4+b,a*4+c+1)) : (board[a][c] += board[a][b],that.sco+=board[a][b]*2, board[a][b] = 0, added[a][c] = 1,fromTo(a*4+b,a*4+c)));}
+	
+	
+	return !0
+}
+
+function moveright() {
+	for (var a = 0; 4 > a; a++)
+		for (var b = 2; 0 <= b; b--)
+			if (0 != board[a][b])
+				for (var c = 3; c > b; c--)
+					if(0 == board[a][c] && noBlockHorizontal(a, b, c, board)){board[a][c] = board[a][b], board[a][b] = 0;fromTo(a*4+b,a*4+c);break}
+					else board[a][c] == board[a][b] && noBlockHorizontal(a, b, c, board) && (0 != added[a][c] ? (board[a][c - 1] = board[a][b], board[a][b] = 0,fromTo(a*4+b,a*4+c-1)) : (board[a][c] += board[a][b],that.sco+=board[a][b]*2, board[a][b] = 0, added[a][c] = 1,fromTo(a*4+b,a*4+c)));
+	
+	
+	return !0
+}
+
+function moveup() {
+	for (var a = 0; 4 > a; a++)
+		for (var b = 1; 4 > b; b++)
+			if (0 != board[b][a])
+				for (var c = 0; c < b; c++){
+					if(0 == board[c][a] && noBlockVertical(a, c, b, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}
+					else board[c][a] == board[b][a] && noBlockVertical(a, c, b, board) && (0 != added[c][a] ? (board[c + 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c+1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a]*2, board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
+}
+function movedown() {
+	for (var a = 0; 4 > a; a++)
+		for (var b = 2; 0 <= b; b--)
+			if (0 != board[b][a])
+				for (var c = 3; c > b; c--){if(0 == board[c][a] && noBlockVertical(a, b, c, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}else board[c][a] == board[b][a] && noBlockVertical(a, b, c, board) && (0 != added[c][a] ? (board[c - 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c-1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a]*2, board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
+}
+function canMoveLeft(a) {
+	for (var b = 0; 4 > b; b++)
+		for (var c = 0; 4 > c; c++)
+			if (0 != a[b][c] && 0 != c && (0 == a[b][c - 1] || a[b][c - 1] == a[b][c])) return !0;
+	return !1
+}
+
+function canMoveRight(a) {
+	for (var b = 0; 4 > b; b++)
+		for (var c = 0; 4 > c; c++)
+			if (0 != a[b][c] && 3 != c && (0 == a[b][c + 1] || a[b][c + 1] == a[b][c])) return !0;
+	return !1
+}
+
+function canMoveUp(a) {
+	for (var b = 0; 4 > b; b++)
+		for (var c = 0; 4 > c; c++)
+			if (0 != a[b][c] && 0 != b && (0 == a[b - 1][c] || a[b - 1][c] == a[b][c])) return !0;
+	return !1
+}
+
+function canMoveDown(a) {
+	for (var b = 0; 4 > b; b++)
+		for (var c = 0; 4 > c; c++)
+			if (0 != a[b][c] && 3 != b && (0 == a[b + 1][c] || a[b + 1][c] == a[b][c])) return !0;
+	return !1
+}
+
+function noBlockHorizontal(a, b, c, d) {
+	for (b += 1; b < c; b++)
+		if (0 != d[a][b]) return !1;
+	return !0
+}
+
+function noBlockVertical(a, b, c, d) {
+	for (b += 1; b < c; b++)
+		if (0 != d[b][a]) return !1;
+	return !0
+}
+
+</script>
