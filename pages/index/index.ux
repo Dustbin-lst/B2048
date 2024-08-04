@@ -115,15 +115,12 @@ export default {
 		bgc: [],
 		ise: [],
 		ch:0,
-		update:0,
 		dark:false,
-		swSrc:"/common/false.png",
 		menuFlag:false,
 		ani:true
 	},
 	onInit() {
 		that = this;
-		this.update=0
 		let tempc =
 			"rgba(0,0,0,0) #EFE5DA #F0E0C9 #fcb477 #ff9c61 #ff865d #ff6a38 #ebcf71 #ebcc5f #ebc94f #ebc53f #ebc22c #F2B6B6 #E8ED51 #FFE3FB #E8FF8C #FFDEC9 #F5A433 #E6109B #96C4E6 #E560CD".split(
 				" "
@@ -147,10 +144,6 @@ export default {
 				//console.log(data)
 				} else this.new_game();
 				
-			},
-			fail: function (data, code) {
-			},complete:()=>{
-				this.update=1;
 			}
 		});
 		clear(added)
@@ -338,7 +331,7 @@ function fromTo(id1,id2){//动画函数，让id1的物品移动到id2
 		x2-=x1;y2-=y1
 		folme.fromTo({id:id1,fromState:{translateY:"0px",translateX:"0px"},toState:{translateY:y2+"px",translateX:x2+"px"},config:{duration:0.1}});
 	}
-	return
+	return 0
 }
 function clearani(){//清除动画
 	for (let i = 0; i < 16; i++) {
@@ -352,7 +345,7 @@ function moveleft() {
 		for (var b = 1; 4 > b; b++)
 			if (0 != board[a][b])
 				for (var c = 0; c < b; c++) {
-					if(0 == board[a][c] && noBlockHorizontal(a, c, b, board) ){
+					if(0 == board[a][c] && noBlockHorizontal(a, c, b, board)){
 						board[a][c] = board[a][b], board[a][b] = 0;
 						fromTo(a*4+b,a*4+c)
 						break
@@ -381,13 +374,13 @@ function moveup() {
 			if (0 != board[b][a])
 				for (var c = 0; c < b; c++){
 					if(0 == board[c][a] && noBlockVertical(a, c, b, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}
-					else board[c][a] == board[b][a] && noBlockVertical(a, c, b, board) && (0 != added[c][a] ? (board[c + 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c+1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a]*2, board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
+					else board[c][a] == board[b][a] && noBlockVertical(a, c, b, board) && (0 != added[c][a] ? (board[c + 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c+1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a], board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
 }
 function movedown() {
 	for (var a = 0; 4 > a; a++)
 		for (var b = 2; 0 <= b; b--)
 			if (0 != board[b][a])
-				for (var c = 3; c > b; c--){if(0 == board[c][a] && noBlockVertical(a, b, c, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}else board[c][a] == board[b][a] && noBlockVertical(a, b, c, board) && (0 != added[c][a] ? (board[c - 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c-1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a]*2, board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
+				for (var c = 3; c > b; c--){if(0 == board[c][a] && noBlockVertical(a, b, c, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}else board[c][a] == board[b][a] && noBlockVertical(a, b, c, board) && (0 != added[c][a] ? (board[c - 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c-1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a], board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
 }
 function canMoveLeft(a) {
 	for (var b = 0; 4 > b; b++)
