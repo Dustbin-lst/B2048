@@ -1,7 +1,7 @@
 {
   "package": "com.lst.b2048",
   "name": "2048",
-  "versionName": "1.2.1",
+  "versionName": "1.2.2",
   "versionCode": 5,
   "minPlatformVersion": 1000,
   "icon": "/common/logo.png",
