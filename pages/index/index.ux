@@ -26,10 +26,10 @@
 		</div>
 		<!--中间-->
 		<div style="position: absolute;left: 14px;top: 86px;width: 308px;height: 308px;padding-top: 8px;padding-left:8px;display: flex;flex-wrap: wrap;" >
-			<text class="square" for="{{md}}" style="background-color: {{bgc[$item]}};border: {{(!!$item)*3}}px;font-size: {{$item>2047?16:32}}px;"id="b{{$idx}}" tid="b{{$idx}}"  if="{{!dark}}">
+			<text class="square" for="{{md}}" style="background-color: {{bgc[$item]}};border: {{(!!$item)*3}}px;font-size: {{$item>1000?16:32}}px;"id="b{{$idx}}" tid="b{{$idx}}"  if="{{!dark}}">
 				{{$item}}
 			</text>
-			<text class="square" for="{{md}}" style="color: {{bgc[$item]}};background-color: {{$item?'rgba(0, 0, 0, 0.36)':'#00000000'}};border: {{(!!$item)*3}}px;font-size: {{$item>2047?16:32}}px;"id="b{{$idx}}" tid="b{{$idx}}" else >
+			<text class="square" for="{{md}}" style="color: {{bgc[$item]}};background-color: {{$item?'rgba(0, 0, 0, 0.36)':'#00000000'}};border: {{(!!$item)*3}}px;font-size: {{$item>1000?16:32}}px;"id="b{{$idx}}" tid="b{{$idx}}" else >
 				{{$item}} 
 			</text>
 		</div>
@@ -335,19 +335,21 @@ function fromTo(id1,id2){//动画函数，让id1的物品移动到id2
 	if(that.ani){
 		id1="b"+id1
 		id2="b"+id2
-		let x1,y1,x2,y2;
+		var x1,y1,x2,y2;
 		that.$element(id1).getBoundingClientRect({
 			success: (data)=>{
-				let { top, bottom, left, right, width, height } = data;
+				var { top, bottom, left, right, width, height } = data;
 				x1=left;y1=top
+				that.$element(id2).getBoundingClientRect({
+					success: (data)=>{
+						var { top, bottom, left, right, width, height } = data;
+						x2=left;y2=top
+						x2-=x1;y2-=y1
+					folme.fromTo({id:id1,fromState:{translateY:"0px",translateX:"0px"},toState:{translateY:y2+"px",translateX:x2+"px"},config:{duration:0.1}});
+				}})
 		}})
-		that.$element(id2).getBoundingClientRect({
-			success: (data)=>{
-				let { top, bottom, left, right, width, height } = data;
-				x2=left;y2=top
-		}})
-		x2-=x1;y2-=y1
-		folme.fromTo({id:id1,fromState:{translateY:"0px",translateX:"0px"},toState:{translateY:y2+"px",translateX:x2+"px"},config:{duration:0.1}});
+		
+		
 	}
 	return 0
 }
