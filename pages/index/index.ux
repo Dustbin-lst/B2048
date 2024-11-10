@@ -26,17 +26,17 @@
 		</div>
 		<!--中间-->
 		<div style="position: absolute;left: 14px;top: 86px;width: 308px;height: 308px;padding-top: 8px;padding-left:8px;display: flex;flex-wrap: wrap;" >
-			<text class="square" for="{{blocks}}" style="background-color: {{bgc[md[$item]]}};border: {{(!!md[$item])*3}}px;font-size: {{md[$item]>2047?16:32}}px;"tid={{$item}} id={{$item}}  if="{{!dark}}">
-				{{ md[$item] }}
+			<text class="square" for="{{blocks}}" style="background-color: {{bgc[md[$idx]]}};border: {{(!!md[$idx])*3}}px;font-size: {{md[$idx]>2047?16:32}}px;"tid={{$idx}} id={{$idx}}  if="{{!dark}}">
+				{{ md[$idx] }}
 			</text>
-			<text class="square" for="{{blocks}}" style="color: {{bgc[md[$item]]}};background-color: {{md[$item]?'rgba(0, 0, 0, 0.36)':'#00000000'}};border: {{(!!md[$item])*3}}px;font-size: {{md[$item]>2047?16:32}}px;"tid={{$item}} id={{$item}} else >
-				{{ md[$item] }} 
+			<text class="square" for="{{blocks}}" style="color: {{bgc[md[$idx]]}};background-color: {{md[$idx]?'rgba(0, 0, 0, 0.36)':'#00000000'}};border: {{(!!md[$idx])*3}}px;font-size: {{md[$idx]>2047?16:32}}px;"tid={{$idx}} id={{$idx}} else >
+				{{ md[$idx] }} 
 			</text>
 		</div>
 		
 		<!--about-->
 		<div class="bg" show="{{menuFlag}}" style="background-color:rgba(0,0,0,0)">
-		<div class="bg" id="about" style="transform:translateX(192px)" onclick="open1()">
+		<div class="bg" id="about" onclick="open1()">
 			<img src="/common/about.png"/>
 			<!-- 时间 -->
 			<text class="score" style="font-size: 20px;top: 12px;">{{time}}</text>
@@ -87,8 +87,14 @@ import prompt from "@system.prompt";
 import storage from "@system.storage";
 import folme from '@system.folme'
 import router from "@system.router"
+let icanuse=false
+try{
+	icanuse=typeof folme=="object"
+}catch{
+	icanuse=false
+}
 
-var sc = 0,
+let sc = 0,
 	ls,
 	lhs,
 	board = Array(4),
@@ -100,32 +106,16 @@ var sc = 0,
 for (let i = 0; i < 4; i++) {lm[i]=new Array(4);board[i]=new Array(4);added[i]=new Array(4)}
 export default {
 	public: {
-		blocks: [
-			"0",
-			"1",
-			"2",
-			"3",
-			"4",
-			"5",
-			"6",
-			"7",
-			"8",
-			"9",
-			"10",
-			"11",
-			"12",
-			"13",
-			"14",
-			"15",
-		],
+		blocks:Array(16),
 		md: [],
 		hsc: 0,
 		sco: sc,
 		bgc: {},
 		ch:0,
-		dark:true,
 		menuFlag:false,
-		ani:false,time:"00:00",fuckrgb:false
+		dark:true,ani:false,fuckrgb:false,//设置项
+		time:"00:00",
+		settingl:192*icanuse
 	},
 	onInit() {
 		storage.get({
@@ -169,6 +159,8 @@ export default {
 			}
 		});
 		clear(added)
+	},onShow(){
+		if(icanuse)folme.setTo({id:"about",toState:{translateX:"336px"}});
 	},
 	chcb() {
 		if (this.ch ==1) {
@@ -232,7 +224,11 @@ export default {
 	exit(a) {
   		if(a.direction=='right'||a=="e"){
 			if(this.menuFlag){
-				folme.to({id:"about",toState:{translateX:"192px"},config:{duration:0.1,ease:"out"}});
+				if(!icanuse){
+					this.menuFlag =false;
+					return
+				}
+				folme.to({id:"about",toState:{translateX:"336px"},config:{duration:0.1,ease:"out"}});
 				setTimeout(() => {this.menuFlag =false;}, 100);
 			}
 			else this.$app.exit();
@@ -241,9 +237,7 @@ export default {
 
 	openMenu() {//打开about
   		this.menuFlag =true;
-		setTimeout(() => {
-			folme.to({id:"about",toState:{translateX:"0px"},config:{duration:0.1,ease:"out"}});
-		}, 50);
+		if(icanuse)folme.to({id:"about",toState:{translateX:"0px"},config:{duration:0.1,ease:"out"}});
 	},
 
 	changeMode(){
@@ -253,10 +247,6 @@ export default {
 			value:this.dark?"dark":"light",
 			success:()=>{this.fuckrgb=false}
 		});
-	},
-	changeani(){
-		this.ani=!this.ani;
-		this.save()
 	},onBackPress(){
 		this.exit('e')
 		return true;
@@ -265,7 +255,7 @@ export default {
 		srct=setTimeout(()=>src=0,500)
 		src++
 		if(src>=5){
-			router.push({uri:"pages/settings"})
+			router.push({uri:"pages/settings",params:{ani:icanuse}})
 			src=0
 		}
 	}
@@ -273,7 +263,7 @@ export default {
 function rm0(sm) {
 	let a=0;
 	for (let i = 0; i < 4; i++) {
-		for (var b = 0; 4 > b; b++) 
+		for (let b = 0; 4 > b; b++) 
 		{
 			if (sm[i][b] == 0) {
 				that.md[a]=""
@@ -296,7 +286,7 @@ function rand_num(){//生成随机数，为了适配8的代码
 	return Math.floor(Math.random()*1000)
 }
 function newblock() {//生成新方块
-	for (var a = 3, b = rand_num() % 4, c = rand_num() % 4, d = 50 < rand_num() % 100 ? 4 : 2; 0 < a;) {
+	for (let a = 3, b = rand_num() % 4, c = rand_num() % 4, d = 50 < rand_num() % 100 ? 4 : 2; 0 < a;) {
 		if (0 == board[b][c]) return board[b][c] = d
 		b = rand_num() % 4;
 		c = rand_num() % 4;
@@ -370,10 +360,10 @@ function clearani(){//清除动画
 	}
 }
 function moveleft() {
-	for (var a = 0; 4 > a; a++)
-		for (var b = 1; 4 > b; b++)
+	for (let a = 0; 4 > a; a++)
+		for (let b = 1; 4 > b; b++)
 			if (0 != board[a][b])
-				for (var c = 0; c < b; c++) {
+				for (let c = 0; c < b; c++) {
 					if(0 == board[a][c] && noBlockHorizontal(a, c, b, board)){
 						board[a][c] = board[a][b], board[a][b] = 0;
 						fromTo(a*4+b,a*4+c)
@@ -386,10 +376,10 @@ function moveleft() {
 }
 
 function moveright() {
-	for (var a = 0; 4 > a; a++)
-		for (var b = 2; 0 <= b; b--)
+	for (let a = 0; 4 > a; a++)
+		for (let b = 2; 0 <= b; b--)
 			if (0 != board[a][b])
-				for (var c = 3; c > b; c--)
+				for (let c = 3; c > b; c--)
 					if(0 == board[a][c] && noBlockHorizontal(a, b, c, board)){board[a][c] = board[a][b], board[a][b] = 0;fromTo(a*4+b,a*4+c);break}
 					else board[a][c] == board[a][b] && noBlockHorizontal(a, b, c, board) && (0 != added[a][c] ? (board[a][c - 1] = board[a][b], board[a][b] = 0,fromTo(a*4+b,a*4+c-1)) : (board[a][c] += board[a][b],that.sco+=board[a][b]*2, board[a][b] = 0, added[a][c] = 1,fromTo(a*4+b,a*4+c)));
 	
@@ -398,43 +388,43 @@ function moveright() {
 }
 
 function moveup() {
-	for (var a = 0; 4 > a; a++)
-		for (var b = 1; 4 > b; b++)
+	for (let a = 0; 4 > a; a++)
+		for (let b = 1; 4 > b; b++)
 			if (0 != board[b][a])
-				for (var c = 0; c < b; c++){
+				for (let c = 0; c < b; c++){
 					if(0 == board[c][a] && noBlockVertical(a, c, b, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}
 					else board[c][a] == board[b][a] && noBlockVertical(a, c, b, board) && (0 != added[c][a] ? (board[c + 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c+1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a], board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
 }
 function movedown() {
-	for (var a = 0; 4 > a; a++)
-		for (var b = 2; 0 <= b; b--)
+	for (let a = 0; 4 > a; a++)
+		for (let b = 2; 0 <= b; b--)
 			if (0 != board[b][a])
-				for (var c = 3; c > b; c--){if(0 == board[c][a] && noBlockVertical(a, b, c, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}else board[c][a] == board[b][a] && noBlockVertical(a, b, c, board) && (0 != added[c][a] ? (board[c - 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c-1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a], board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
+				for (let c = 3; c > b; c--){if(0 == board[c][a] && noBlockVertical(a, b, c, board)){board[c][a] = board[b][a], board[b][a] = 0;fromTo(b*4+a,c*4+a);break}else board[c][a] == board[b][a] && noBlockVertical(a, b, c, board) && (0 != added[c][a] ? (board[c - 1][a] = board[b][a], board[b][a] = 0,fromTo(b*4+a,(c-1)*4+a)) : (board[c][a] += board[b][a],that.sco+=board[c][a], board[b][a] = 0, added[c][a] = 1,fromTo(b*4+a,c*4+a)));}
 }
 function canMoveLeft(a) {
-	for (var b = 0; 4 > b; b++)
-		for (var c = 0; 4 > c; c++)
+	for (let b = 0; 4 > b; b++)
+		for (let c = 0; 4 > c; c++)
 			if (0 != a[b][c] && 0 != c && (0 == a[b][c - 1] || a[b][c - 1] == a[b][c])) return !0;
 	return !1
 }
 
 function canMoveRight(a) {
-	for (var b = 0; 4 > b; b++)
-		for (var c = 0; 4 > c; c++)
+	for (let b = 0; 4 > b; b++)
+		for (let c = 0; 4 > c; c++)
 			if (0 != a[b][c] && 3 != c && (0 == a[b][c + 1] || a[b][c + 1] == a[b][c])) return !0;
 	return !1
 }
 
 function canMoveUp(a) {
-	for (var b = 0; 4 > b; b++)
-		for (var c = 0; 4 > c; c++)
+	for (let b = 0; 4 > b; b++)
+		for (let c = 0; 4 > c; c++)
 			if (0 != a[b][c] && 0 != b && (0 == a[b - 1][c] || a[b - 1][c] == a[b][c])) return !0;
 	return !1
 }
 
 function canMoveDown(a) {
-	for (var b = 0; 4 > b; b++)
-		for (var c = 0; 4 > c; c++)
+	for (let b = 0; 4 > b; b++)
+		for (let c = 0; 4 > c; c++)
 			if (0 != a[b][c] && 3 != b && (0 == a[b + 1][c] || a[b + 1][c] == a[b][c])) return !0;
 	return !1
 }

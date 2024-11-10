@@ -1,7 +1,7 @@
 <template>
 	<div class="bg" onswipe="exit">
 		<div class="btn" onclick="fuckrgb"><text>去他妈的rgb</text><img src="./l.png"/></div>
-		<div class="btn" onclick="changeBg"><text>滑动动画</text><img src="./l.png"/></div>
+		<div class="btn" onclick="changeBg" if="{{ani=='true'}}"><text>滑动动画</text><img src="./l.png"/></div>
 		<text style="width: 90%;">本页面的设置都需要退出应用后才生效，开启本页面任何功能导致的bug乐色桶均不负责</text>
 		<list class="bg" if="{{listshow}}">
 			<list-item class="btn" for="{{list}}" type="sb" onclick="listclick({{$idx}})">
@@ -59,11 +59,14 @@ text{
 </style>
 
 <script>
-var listcall=()=>{},d
+let listcall=()=>{},d
 import storage from "@system.storage";
 import prompt from "@system.prompt";
 import router from "@system.router"
 export default {
+	protected:{
+		ani:false
+	},
 	private: {
 		listnow:0,
 		list:[],
