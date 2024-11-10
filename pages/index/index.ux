@@ -2,41 +2,51 @@
 	<div onswipe="move" class="bg">
 		<!--背景+按钮-->
 		<div class="bg" if="{{dark}}">
-			<img src="/common/bg2.png" class="bg"/>
-			<img style="position: absolute;left: 8px;top: 363px;" src="/common/reset_b.png" @click="new_game" />
-			<img style="position: absolute;left: 100px;top: 363px;" src="/common/undo_b.png" @click="chcb" />
-			<img style="position: absolute;left: 56px;top: 424px;" src="/common/info_b.png" @click="openMenu()"/>
+			<img src="/common/Dark.png" class="bg" if="{{!fuckrgb}}"/>
+			<img src="/common/bg_B.png" class="bg" else/>
+			<img style="left: 6px;top: 402px;" src="/common/Reset_B.png" @click="new_game" />
+			<img style="position: absolute;left: 258px;top: 402px;" src="/common/Undo_B.png" @click="chcb" />
+			<img style="position: absolute;left: 258px;top: 6px;" src="/common/Info_B.png" @click="openMenu()"/>
+			<img style="position: absolute;left: 6px;top: 6px;" src="/common/Back_B_rgb.png" @click="exit('e')"/>
+			<!-- 时间 -->
+			<text class="score" style="font-size: 20px;top: 12px;">{{time}}</text>
+			<!--积分版-->
+			<text class="score">{{ sco }}</text>
 		</div>
 		<div class="bg" else>
-			<img src="/common/bg1.png" class="bg"/>
-			<img style="position: absolute;left: 8px;top: 363px;" src="/common/reset.png" @click="new_game" />
-			<img style="position: absolute;left: 100px;top: 363px;" src="/common/undo.png" @click="chcb" />
-			<img style="position: absolute;left: 56px;top: 424px;" src="/common/info.png" @click="openMenu()"/>
+			<img src="/common/Light.png" class="bg"/>
+			<img style="left: 6px;top: 402px;" src="/common/Reset.png" @click="new_game" />
+			<img style="position: absolute;left: 258px;top: 402px;" src="/common/Undo.png" @click="chcb" />
+			<img style="position: absolute;left: 258px;top: 6px;" src="/common/Info.png" @click="openMenu()"/>
+			<img style="position: absolute;left: 6px;top: 6px;" src="/common/Back.png" @click="exit('e')"/>
+			<!-- 时间 -->
+			<text class="score" style="font-size: 20px;top: 12px;color: rgba(0, 0, 0, 0.4);">{{time}}</text>
+			<!--积分版-->
+			<text class="score" style="color: rgba(0, 0, 0, 0.4);">{{ sco }}</text>
 		</div>
 		<!--中间-->
-		<div style="position: absolute;left: 3px;top: 165px;width: 186px;height: 186px;padding-top: 3px;padding-left:3px;display: flex;flex-wrap: wrap;" >
-			<text class="square" for="{{blocks}}" style="background-color: {{bgc[md[$item]]}};"tid={{$item}} id={{$item}}  if="{{!dark}}">
+		<div style="position: absolute;left: 14px;top: 86px;width: 308px;height: 308px;padding-top: 8px;padding-left:8px;display: flex;flex-wrap: wrap;" >
+			<text class="square" for="{{blocks}}" style="background-color: {{bgc[md[$item]]}};border: {{(!!md[$item])*3}}px;font-size: {{md[$item]>2047?16:32}}px;"tid={{$item}} id={{$item}}  if="{{!dark}}">
 				{{ md[$item] }}
 			</text>
-			<text class="square" for="{{blocks}}" style="color: {{bgc[md[$item]]}};background-color: {{ise[$item]}}"tid={{$item}} id={{$item}} else >
+			<text class="square" for="{{blocks}}" style="color: {{bgc[md[$item]]}};background-color: {{md[$item]?'rgba(0, 0, 0, 0.36)':'#00000000'}};border: {{(!!md[$item])*3}}px;font-size: {{md[$item]>2047?16:32}}px;"tid={{$item}} id={{$item}} else >
 				{{ md[$item] }} 
 			</text>
 		</div>
-		<!--积分版-->
-		<text class="score">最高 {{ hsc }}</text>
-		<text class="score"style="top: 122px;">当前 {{ sco }}</text>
+		
 		<!--about-->
-		<div class="bg" if="{{menuFlag}}" style="background-color:rgba(0,0,0,0)">
-		<scroll class="bg" scroll-y="true" bounces="true" id="about" style="transform:translateX(192px)">
+		<div class="bg" show="{{menuFlag}}" style="background-color:rgba(0,0,0,0)">
+		<div class="bg" id="about" style="transform:translateX(192px)" onclick="open1()">
 			<img src="/common/about.png"/>
-			<img src="/common/true.png" if="{{dark}}" class="btn"onclick="changeMode"/>
-			<img src="/common/false.png" else class="btn"onclick="changeMode"/>
-			<img src="/common/true.png" if="{{ani}}" class="btn" style="top: 674px;" onclick="changeani"/>
-			<img src="/common/false.png" else class="btn"onclick="changeani"style="top: 674px;"/>
-		</scroll></div>
+			<!-- 时间 -->
+			<text class="score" style="font-size: 20px;top: 12px;">{{time}}</text>
+			<text style="position: absolute;left: 12px;top: 288px;width: 318px;height: 42px;font-size: 32px;text-align: left;color: #FFFFFF;">{{hsc}}</text>
+			<img style="position: absolute;left: 258px;top: 6px;" src="/common/DarkMode.png" @click="changeMode()" if="{{dark}}"/>
+			<img style="position: absolute;left: 258px;top: 6px;" src="/common/LightMode.png" @click="changeMode()"else/>
+			<img style="position: absolute;left: 6px;top: 6px;" src="/common/Back_B.png" @click="exit('e')"/>
+		</div></div>
 		<!--back-->
-		<img style="position: absolute;left: 45px;top: 6px;" src="/common/back_b.png" @click="exit('e')" if="{{dark||menuFlag}}"/>
-		<img style="position: absolute;left: 45px;top: 6px;" src="/common/back.png" @click="exit('e')" else/>
+		
 	</div>
 </template>
 
@@ -47,31 +57,28 @@ text{
 }
 .score {
 	position: absolute;
-	left: 0px;
-	top: 84px;
-	width: 192px;
-	font-size: 28px;
+	left: 78px;
+	top: 441px;
+	width: 180px;
+	height: 32px;
+	font-size: 24px;
+	text-align: center;
 	color: rgba(255, 255, 255, 0.6);
 }
 .square {
-	width: 40px;
-	height: 40px;
+	width: 68px;
+	height: 68px;
 	margin-top: 4px;
 	margin-left: 4px;
-	border-radius: 13px;
-	font-size: 15px;
+	border-radius: 20px;
 	color: #59503f;
+	border:0px solid rgba(255, 255, 255, 0.06);
 }
 .bg{
   position: absolute;
-  width: 192px;
-  height: 490px;
+  width: 336px;
+  height: 480px;
   background-color: black;
-}
-.btn{
-	position: absolute;
-	left: 45px;
-	top: 504px;
 }
 </style>
 
@@ -79,6 +86,7 @@ text{
 import prompt from "@system.prompt";
 import storage from "@system.storage";
 import folme from '@system.folme'
+import router from "@system.router"
 
 var sc = 0,
 	ls,
@@ -87,7 +95,8 @@ var sc = 0,
 	added = Array(4),
 	over = 0,
 	lm =Array(4),
-	that;
+	that,
+	src,srct;
 for (let i = 0; i < 4; i++) {lm[i]=new Array(4);board[i]=new Array(4);added[i]=new Array(4)}
 export default {
 	public: {
@@ -112,15 +121,29 @@ export default {
 		md: [],
 		hsc: 0,
 		sco: sc,
-		bgc: [],
-		ise: [],
+		bgc: {},
 		ch:0,
-		dark:false,
+		dark:true,
 		menuFlag:false,
-		ani:true
+		ani:false,time:"00:00",fuckrgb:false
 	},
 	onInit() {
+		storage.get({
+			key: "dark",
+			success: (data) => {
+				this.dark=data!="light"
+				this.fuckrgb=data=="fuck"
+			}
+		});
 		that = this;
+		//时间
+		const now=new Date()
+		this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+		setTimeout(()=>setInterval(()=>{
+			const now=new Date()
+			this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+		},1000),1000 -Date.now()%1000)
+		//颜色
 		let tempc =
 			"rgba(0,0,0,0) #EFE5DA #F0E0C9 #fcb477 #ff9c61 #ff865d #ff6a38 #ebcf71 #ebcc5f #ebc94f #ebc53f #ebc22c #F2B6B6 #E8ED51 #FFE3FB #E8FF8C #FFDEC9 #F5A433 #E6109B #96C4E6 #E560CD".split(
 				" "
@@ -128,7 +151,7 @@ export default {
 		tempc.forEach((a, index) => {
 			this.bgc[2 ** index] = a;
 		});
-		this.bgc[""] = "rgba(0, 0, 0, 0)";
+		this.bgc[""] = "#00000000";
 		storage.get({
 			key: "score",
 			success: (data) => {
@@ -139,7 +162,6 @@ export default {
 					this.hsc = o.hs;
 					this.sco=o.sc
 					this.ch = 0;
-					this.dark=o.dark
 					this.ani=o.ani
 				//console.log(data)
 				} else this.new_game();
@@ -198,16 +220,12 @@ export default {
 			map: board,
 			hs: this.hsc,
 			sc: this.sco,
-			dark:this.dark,
 			ani:this.ani
 		};
 		//o=""
 		storage.set({
 			key: "score",
-			value: JSON.stringify(o),
-			success:()=>{//console.log(JSON.stringify(o))
-			},
-			fail:()=>{},
+			value: JSON.stringify(o)
 		});
 	},
 
@@ -230,7 +248,11 @@ export default {
 
 	changeMode(){
 		this.dark=!this.dark;
-		this.save()
+		storage.set({
+			key: "dark",
+			value:this.dark?"dark":"light",
+			success:()=>{this.fuckrgb=false}
+		});
 	},
 	changeani(){
 		this.ani=!this.ani;
@@ -238,6 +260,14 @@ export default {
 	},onBackPress(){
 		this.exit('e')
 		return true;
+	},open1(){
+		clearTimeout(srct)
+		srct=setTimeout(()=>src=0,500)
+		src++
+		if(src>=5){
+			router.push({uri:"pages/settings"})
+			src=0
+		}
 	}
 };
 function rm0(sm) {
@@ -247,8 +277,7 @@ function rm0(sm) {
 		{
 			if (sm[i][b] == 0) {
 				that.md[a]=""
-				that.ise[a]="#00000000";
-			} else {that.ise[a]="#ffffff20";that.md[a]=sm[i][b]}
+			} else {that.md[a]=sm[i][b]}
 			a++
 		}}
 	return

@@ -1,0 +1,125 @@
+<template>
+	<div class="bg" onswipe="exit">
+		<div class="btn" onclick="fuckrgb"><text>去他妈的rgb</text><img src="./l.png"/></div>
+		<div class="btn" onclick="changeBg"><text>滑动动画</text><img src="./l.png"/></div>
+		<text style="width: 90%;">本页面的设置都需要退出应用后才生效，开启本页面任何功能导致的bug乐色桶均不负责</text>
+		<list class="bg" if="{{listshow}}">
+			<list-item class="btn" for="{{list}}" type="sb" onclick="listclick({{$idx}})">
+				<text>{{$item}}</text>
+				<div style="position: absolute;left: 255px;top: 32px;width: 1px;height: 48px;background-color: #424242;"><!-- 线 --></div>
+				<div style="background-color: #333333;" class="btn2" if="{{listnow!=$idx}}"></div>
+				<div else style="background-color: #0D84FF;" class="btn2"><div style="border-radius: 99px;width: 26px;height: 26px;background-color: #ffffff;"></div></div>
+			</list-item>
+		</list>
+		<!-- 时间标题 -->
+		<text style="position: absolute;left: 72px;top: 39px;width: 192px;height: 37px;text-align: center;">{{title}}</text>
+		<text style="position: absolute;top: 12px;width: 336px;height: 27px;font-size: 20px;text-align: center;color: #9E9E9E;">{{time}}</text>
+		<!--返回-->
+		<img src="/common/Back_B.png"onclick="exit('e')" style="position: absolute;left: 6px;top: 6px;"/>
+	</div>
+</template>
+
+<style>
+.bg{
+  position: absolute;
+  width: 336px;
+  height: 480px;
+  padding-left: 4px;
+  flex-direction: column;
+  background-color: black;
+  padding-top: 78px;
+  object-fit:none
+}
+.btn{
+	margin-top: 8px;
+	width: 328px;
+	height: 112px;
+	border-radius: 24px;
+	background-color: #222222;
+	padding: 12px;
+	justify-content:space-between;
+	align-items: center;
+}
+text{
+	width: 336px;
+	text-align: left;
+	color: #FFFFFF;
+	font-weight: bold;
+}
+.btn2{
+	position: absolute;
+	right: 11px;
+	top: 30px;
+	width: 48px;
+	height: 48px;
+	border-radius: 99px;
+	justify-content:center;
+	align-items: center;
+}
+</style>
+
+<script>
+var listcall=()=>{},d
+import storage from "@system.storage";
+import prompt from "@system.prompt";
+import router from "@system.router"
+export default {
+	private: {
+		listnow:0,
+		list:[],
+		listshow:false,info:false,
+		time:"00:00",title:"神必设置"
+	},exit(a) {
+  		if(a.direction=='right'||a=="e"){
+			if(!this.listshow&&!this.info)router.back();
+			else {this.listshow=this.info=false;this.title="神必设置"}
+		}
+	},
+	onInit() {
+		const now=new Date()
+		this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+		setTimeout(()=>setInterval(()=>{
+			const now=new Date()
+			this.time=`${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`
+		},1000),1000 -Date.now()%1000)
+		storage.get({
+			key: "score",
+			success: (data) => {
+				d = JSON.parse(data);
+				console.log(d)
+			}
+		});
+		
+	},openlist(list,title,onUpd,def=0){
+		this.list=list
+		this.listshow=true
+		this.title=title
+		listcall=onUpd
+		this.listnow=def
+	},listclick(num){
+		this.listnow=num
+		listcall(num)
+		this.save()
+	},save(){
+		storage.set({
+			key:"score",
+			value:JSON.stringify(d),
+			success:()=>{console.log(d)}
+		})
+	}
+	,fuckrgb(){
+		storage.set({
+			key: "dark",
+			value:"fuck"
+		});
+		prompt.showToast({message:"success"})
+	},changeBg(){
+		this.openlist(["关闭","开启"],"铸币动画",(num)=>{
+			d.ani=!d.ani
+		},(d.ani)*1)
+	},openinfo(){
+		this.info=true
+		this.title="关于"
+	}
+}
+</script>

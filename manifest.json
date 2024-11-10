@@ -1,7 +1,7 @@
 {
   "package": "com.lst.b2048",
   "name": "2048",
-  "versionName": "1.2",
+  "versionName": "1.2.1",
   "versionCode": 5,
   "minPlatformVersion": 1000,
   "icon": "/common/logo.png",
@@ -15,13 +15,15 @@
   ],
   "config": {
     "logLevel": "log",
-    "designWidth": 192
+    "designWidth":336
   },
   "router": {
     "entry": "pages/index",
     "pages": {
       "pages/index": {
         "component": "index"
+      },"pages/settings": {
+        "component": "settings"
       }
     }
   }
