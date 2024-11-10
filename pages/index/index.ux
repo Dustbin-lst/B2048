@@ -89,7 +89,7 @@ import folme from '@system.folme'
 import router from "@system.router"
 let icanuse=false
 try{
-	icanuse=typeof folme=="object"
+	icanuse=typeof folme.to=="function"
 }catch{
 	icanuse=false
 }
@@ -160,7 +160,7 @@ export default {
 		});
 		clear(added)
 	},onShow(){
-		if(icanuse)folme.setTo({id:"about",toState:{translateX:"336px"}});
+		if(icanuse&&!this.menuFlag)folme.setTo({id:"about",toState:{translateX:"336px"}});
 	},
 	chcb() {
 		if (this.ch ==1) {
@@ -228,8 +228,8 @@ export default {
 					this.menuFlag =false;
 					return
 				}
-				folme.to({id:"about",toState:{translateX:"336px"},config:{duration:0.1,ease:"out"}});
 				setTimeout(() => {this.menuFlag =false;}, 100);
+				folme.to({id:"about",toState:{translateX:"336px"},config:{duration:0.1,ease:"out"}});
 			}
 			else this.$app.exit();
 		}
